@@ -2,10 +2,18 @@
 
 std::ostream& Color::WritePPM(std::ostream& out)
 {
-	out << static_cast<int>(r * 255.999) << ' '
-		<< static_cast<int>(g * 255.999) << ' '
-		<< static_cast<int>(b * 255.999);
+	out << static_cast<int>(256 * std::clamp(r, 0.0, 0.999)) << ' '
+		<< static_cast<int>(256 * std::clamp(g, 0.0, 0.999)) << ' '
+		<< static_cast<int>(256 * std::clamp(b, 0.0, 0.999));
 	return out;
+}
+
+std::ostream& Color::WritePPM(std::ostream& out, int sample)
+{
+	r = std::sqrt(r / sample);
+	g = std::sqrt(g / sample);
+	b = std::sqrt(b / sample);
+	return WritePPM(out);
 }
 
 Color& Color::operator+=(const Color& rhs)

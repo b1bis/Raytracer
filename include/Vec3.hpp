@@ -1,6 +1,10 @@
 #pragma once
 
 #include <cmath>
+#include <random>
+#include <ctime>
+
+#include "Constants.hpp"
 
 class Vec3
 {
@@ -8,6 +12,11 @@ public:
 	Vec3() = default;
 	Vec3(double x, double y, double z) : m_x {x}, m_y {y}, m_z{z} {}
 	static Vec3 Zero() { return Vec3(0., 0., 0.); }
+
+	static Vec3 Random(double min, double max);
+	static Vec3 Random() { return Vec3::Random(0.0, 1.0); }
+
+	static Vec3 RandomUnitVector();
 
 	double GetX() const { return m_x; }
 	double GetY() const { return m_y; }

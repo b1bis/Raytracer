@@ -11,7 +11,7 @@ public:
 	Vec3 GetOrigin() const { return m_origin; }
 	Vec3 GetDirection() const { return m_direction; }
 
-	Vec3 PointAt(double t);
+	Vec3 PointAt(double t) const;
 private:
 	Vec3 m_origin, m_direction;
 };

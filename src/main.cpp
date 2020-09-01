@@ -1,29 +1,29 @@
 #include <iostream>
 #include <fstream>
+#include <random>
+#include <ctime>
 
 #include "Vec3.hpp"
 #include "Ray.hpp"
 #include "Color.hpp"
+#include "HittableList.hpp"
+#include "Sphere.hpp"
+#include "Camera.hpp"	
 
-double HitSphere(const Vec3& center, double radius, const Ray& ray)
+Color ComputeColor(const Ray& ray, const Hittable& scene, int depth)
 {
-	Vec3 originToCenter{ ray.GetOrigin() - center };
-	double a = Vec3::DotProduct(ray.GetDirection(), ray.GetDirection());
-	double b = 2.0 * Vec3::DotProduct(originToCenter, ray.GetDirection());
-	double c = Vec3::DotProduct(originToCenter, originToCenter) - radius * radius;
-	double discriminant = b * b - 4 * a * c;
-	return (discriminant > 0);
-}
-
-Color ComputeColor(const Ray& ray)
-{
-	if (HitSphere(Vec3(0, 0, -1), 0.5, ray))
-		return Color(1, 0, 0);
-
+	if (depth <= 0)
+		return Color(0, 0, 0);
+	HitInfo info;
+	if (scene.Hit(ray, 0.001, std::numeric_limits<double>::infinity(), info))
+	{
+		Vec3 target = info.point + info.normal + Vec3::RandomUnitVector();
+		return 0.5 * ComputeColor(Ray(info.point, target - info.point), scene, depth - 1);
+	}
 	Vec3 unitDirection = ray.GetDirection();
 	unitDirection.Normalize();
-	double t = 0.5 * (unitDirection.GetY() + 1.0);
-	return (1 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
+	double t = 0.5 * (unitDirection.GetY() + 1);
+	return (1 - t) * Color(1, 1, 1) + t * Color(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char** argv)
@@ -34,31 +34,51 @@ int main(int argc, char** argv)
 	std::ostream& output = file;
 
 	constexpr double ratio = 16.0 / 9.0;
-	constexpr std::size_t imageWidth = 1000;
+	constexpr std::size_t imageWidth = 400;
 	constexpr std::size_t imageHeight = static_cast<std::size_t>(imageWidth / ratio);
+	constexpr unsigned samplePerPixel = 50;
+	constexpr int maxDepth = 50;
 
 	constexpr double viewportHeight = 2.0;
-	constexpr double viewportWidth = ratio * viewportHeight;
 	constexpr double focalLenght = 1.0;
-
-	Vec3 origin = Vec3::Zero();
-	Vec3 horizontal = Vec3(viewportWidth, 0, 0);
-	Vec3 vertical = Vec3(0, viewportHeight, 0);
-	Vec3 lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focalLenght);
+	Camera camera{ ratio, viewportHeight, focalLenght };
 
 	output << "P3" << std::endl << imageWidth << ' ' << imageHeight
 		<< std::endl << "255" << std::endl;
 
-	for (std::size_t y = 0; y < imageHeight; ++y)
+	HittableList scene;
+	scene.Add(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5));
+	scene.Add(std::make_shared<Sphere>(Vec3(0, -100.5, -1), 100));
+
+	std::default_random_engine engine(static_cast<unsigned>(std::time(nullptr)));
+	std::uniform_real_distribution<double> dis(0.0, 1.0);
+	std::vector<double> pregenerate;
+	constexpr std::size_t pregenerateNumbers = 10000;
+
+	for (std::size_t i = 0; i < pregenerateNumbers; ++i)
 	{
-		progress << "Scanline : " << y << std::endl;
+		pregenerate.push_back(dis(engine));
+	}
+
+	auto first = pregenerate.begin();
+
+	for (std::size_t y = imageHeight; y > 0; --y)
+	{
+		progress << "Scanline remaining : " << y << std::endl;
 		for (std::size_t x = 0; x < imageWidth; ++x)
 		{
-			double factorX = static_cast<double>(x) / (imageWidth - 1);
-			double factorY = static_cast<double>(y) / (imageHeight - 1);
-			Ray ray{ origin, lowerLeftCorner + (factorX * horizontal) + (factorY * vertical) - origin };
-			Color computed{ ComputeColor(ray) };
-			computed.WritePPM(output);
+			Color pixelColor;
+			for (std::size_t s = 0; s < samplePerPixel; ++s)
+			{
+				double factorX = static_cast<double>(x + *first) / (imageWidth - 1);
+				if (first + 1 == pregenerate.end()) first = pregenerate.begin();
+
+				double factorY = static_cast<double>(y + *(first + 1)) / (imageHeight - 1);
+				if (first + 2 == pregenerate.end()) first = pregenerate.begin();
+				first += 2;
+				pixelColor += ComputeColor(camera.GetRay(factorX, factorY), scene, maxDepth);
+			}
+			pixelColor.WritePPM(output, samplePerPixel);
 			output << std::endl;
 		}
 	}

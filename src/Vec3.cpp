@@ -1,11 +1,29 @@
 #include "Vec3.hpp"
 
-inline Vec3 Vec3::operator-() const
+Vec3 Vec3::Random(double min, double max)
+{
+	static std::default_random_engine engine(static_cast<unsigned>(std::time(nullptr)));
+	std::uniform_real_distribution<double> dis(min, max);
+	return Vec3(dis(engine), dis(engine), dis(engine));
+}
+
+Vec3 Vec3::RandomUnitVector()
+{
+	static std::default_random_engine engine(static_cast<unsigned>(std::time(nullptr)));
+	std::uniform_real_distribution<double> dis1(0, 2 * Constants::Pi);
+	double a = dis1(engine);
+	std::uniform_real_distribution<double> dis2(-1, 1);
+	double z = dis2(engine);
+	double r = std::sqrt(1 - z * z);
+	return Vec3{ r * std::cos(a), r * std::sin(a), z };
+}
+
+Vec3 Vec3::operator-() const
 {
 	return Vec3(-m_x, -m_y, -m_z);
 }
 
-inline Vec3& Vec3::operator+=(const Vec3& rhs)
+Vec3& Vec3::operator+=(const Vec3& rhs)
 {
 	m_x += rhs.m_x;
 	m_y += rhs.m_y;
@@ -13,7 +31,7 @@ inline Vec3& Vec3::operator+=(const Vec3& rhs)
 	return *this;
 }
 
-inline Vec3& Vec3::operator-=(const Vec3& rhs)
+Vec3& Vec3::operator-=(const Vec3& rhs)
 {
 	m_x -= rhs.m_x;
 	m_y -= rhs.m_y;
@@ -21,7 +39,7 @@ inline Vec3& Vec3::operator-=(const Vec3& rhs)
 	return *this;
 }
 
-inline Vec3& Vec3::operator*=(double t)
+Vec3& Vec3::operator*=(double t)
 {
 	m_x *= t;
 	m_y *= t;
@@ -29,7 +47,7 @@ inline Vec3& Vec3::operator*=(double t)
 	return *this;
 }
 
-inline Vec3& Vec3::operator/=(double t)
+Vec3& Vec3::operator/=(double t)
 {
 	m_x /= t;
 	m_y /= t;

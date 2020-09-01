@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
 
 struct Color
 {
@@ -8,6 +9,7 @@ struct Color
 	Color(double r, double g, double b) : r {r}, g {g}, b {b} {}
 
 	std::ostream& WritePPM(std::ostream& out);
+	std::ostream& WritePPM(std::ostream& out, int sample);
 
 	Color& operator+=(const Color& rhs);
 	Color& operator-=(const Color& rhs);
@@ -15,6 +17,7 @@ struct Color
 	Color& operator/=(double t);
 
 	double r = 0, g = 0, b = 0;
+
 };
 
 Color operator+(const Color& lhs, const Color& rhs);
