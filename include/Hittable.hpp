@@ -17,7 +17,7 @@ struct HitInfo
 
 	inline void NormalFace(const Ray& ray, const Vec3& outwardNormal)
 	{
-		frontFace = Vec3::DotProduct(ray.GetDirection(), outwardNormal);
+		frontFace = (Vec3::DotProduct(ray.GetDirection(), outwardNormal) < 0);
 		normal = frontFace ? outwardNormal : -outwardNormal;
 	}
 };
