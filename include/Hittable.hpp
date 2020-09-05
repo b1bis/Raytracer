@@ -13,6 +13,8 @@ struct HitInfo
 	double t = 0;
 	bool frontFace = false;
 
+	std::shared_ptr<Material> material;
+
 	inline void NormalFace(const Ray& ray, const Vec3& outwardNormal)
 	{
 		frontFace = Vec3::DotProduct(ray.GetDirection(), outwardNormal);

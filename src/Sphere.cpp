@@ -18,6 +18,7 @@ bool Sphere::Hit(const Ray& ray, double tMin, double tMax, HitInfo& info) const
 			info.point = ray.PointAt(temp);
 			Vec3 outwardNormal = (info.point - m_center) / m_radius;
 			info.NormalFace(ray, outwardNormal);
+			info.material = m_material;
 			return true;
 		}
 
@@ -28,6 +29,7 @@ bool Sphere::Hit(const Ray& ray, double tMin, double tMax, HitInfo& info) const
 			info.point = ray.PointAt(temp);
 			Vec3 outwardNormal = (info.point - m_center) / m_radius;
 			info.NormalFace(ray, outwardNormal);
+			info.material = m_material;
 			return true;
 		}
 	}

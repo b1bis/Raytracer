@@ -18,6 +18,9 @@ public:
 
 	static Vec3 RandomUnitVector();
 
+	static Vec3 Reflect(const Vec3& v, const Vec3& n);
+	static Vec3 Refract(const Vec3& uv, const Vec3& n, double etaiOverEtat);
+
 	double GetX() const { return m_x; }
 	double GetY() const { return m_y; }
 	double GetZ() const { return m_z; }
@@ -36,6 +39,7 @@ public:
 	double Lenght() const;
 
 	void Normalize();
+	Vec3 GetNormalized() const;
 
 	static double DotProduct(const Vec3& v1, const Vec3& v2);
 	double DotProduct(const Vec3& v) { return Vec3::DotProduct(*this, v); }

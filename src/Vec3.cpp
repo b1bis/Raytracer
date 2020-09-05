@@ -18,6 +18,19 @@ Vec3 Vec3::RandomUnitVector()
 	return Vec3{ r * std::cos(a), r * std::sin(a), z };
 }
 
+Vec3 Vec3::Reflect(const Vec3& v, const Vec3& n)
+{
+	return v - 2 * Vec3::DotProduct(v, n) * n;
+}
+
+Vec3 Vec3::Refract(const Vec3& uv, const Vec3& n, double etaiOverEtat)
+{
+	double cosTheta = Vec3::DotProduct(-uv, n);
+	Vec3 outPerp = etaiOverEtat * (uv + cosTheta * n);
+	Vec3 outPara = -std::sqrt(std::fabs(1 - outPerp.SquaredLenght())) * n;
+	return outPerp + outPara;
+}
+
 Vec3 Vec3::operator-() const
 {
 	return Vec3(-m_x, -m_y, -m_z);
@@ -74,6 +87,13 @@ void Vec3::Normalize()
 		m_y /= magnitude;
 		m_z /= magnitude;
 	}
+}
+
+Vec3 Vec3::GetNormalized() const
+{
+	Vec3 normalized{ *this };
+	normalized.Normalize();
+	return normalized;
 }
 
 double Vec3::DotProduct(const Vec3& v1, const Vec3& v2)
